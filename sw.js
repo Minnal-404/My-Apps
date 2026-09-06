@@ -1,17 +1,17 @@
 const CACHE_NAME = "v1";
 
 const APP_SHELL = [
-    "/",
-    "/index.html",
-    "/manifest.webmanifest",
-    "/icons/icon-192.png",
-    "/icons/icon-512.png",
-    "/icons/favicon.svg",
-    "/pages/accounts.html",
-    "/pages/salary_details.html",
-    "/pages/split.html",
-    "/bootstrap/css/bootstrap.min.css",
-    "/bootstrap/js/bootstrap.bundle.min.js",
+    "./",
+    "./index.html",
+    "./manifest.webmanifest",
+    "./icons/icon-192.png",
+    "./icons/icon-512.png",
+    "./icons/favicon.svg",
+    "./pages/accounts.html",
+    "./pages/salary_details.html",
+    "./pages/split.html",
+    "./bootstrap/css/bootstrap.min.css",
+    "./bootstrap/js/bootstrap.bundle.min.js",
 
 ];
 
