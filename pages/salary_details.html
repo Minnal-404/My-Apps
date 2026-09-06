@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Salary Details</title>
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+    <main class="container pt-3">
+
+        <div id="inputs">
+            <div class="card card-body mb-3">
+
+                <form class="row g-3 needs-validation" novalidate>
+                    <div class="col-md-4">
+                        <label for="month" class="form-label">Month : </label>
+                        <input type="month" id="month" name="month" class="form-control" >
+                        <div class="invalid-feedback">
+                            Name Is 
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="salary_per_month" class="form-label">Salary Per Month : </label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text" id="">₹</span>
+                            <input type="number" name="amount" class="form-control" id="salary_per_month"
+                                min="0" placeholder="Salary Per Month" aria-describedby="inputGroupPrepend" >
+                            <div class="invalid-feedback">
+                                Amount Is 
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="credited_salary" class="form-label">Credited Salary : </label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text" id="inputGroupPrepend">₹</span>
+                            <input type="number" name="credited_salary" class="form-control"
+                                id="credited_salary" min="0" placeholder="Credited Salary"
+                                aria-describedby="inputGroupPrepend" >
+                            <div class="invalid-feedback">
+                                Amount Is 
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="number_of_working_days" class="form-label">Your Working Days : </label>
+                            <input type="number" name="number_of_working_days" class="form-control"
+                                id="number_of_working_days" min="0" placeholder="Your Working Days"
+                                aria-describedby="inputGroupPrepend" >
+                            <div class="invalid-feedback">
+                                Amount Is 
+                            </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="leaves" class="form-label">Leaves : </label>
+                            <input type="number" name="leaves" class="form-control" id="leaves" min="0"
+                                placeholder="Leaves" aria-describedby="inputGroupPrepend" >
+                            <div class="invalid-feedback">
+                                Amount Is 
+                            </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+
+        <div id="result" class="fw-bold fs-5">
+            Salary Per Month : <span class="text-warning">₹<span id="salary_per_month_result"
+                    class="text-warning">0</span></span><br>
+            Salary Per Day : <span class="text-warning">₹<span id="salary_per_day_result"
+                    class="text-warning">0</span></span><br>
+            Total Working Days : <span id="total_number_of_working_days" class="text-warning">0</span><br>
+            Your Salary : <span class="text-warning">₹<span id="credited_salary_result"
+                    class="text-warning">0</span></span><br>
+            Your Working Days : <span id="number_of_working_days_result" class="text-warning">0</span><br>
+            Leaves : <span id="leaves_result" class="text-warning">0</span><br>
+        </div>
+    </main>
+    <script>
+        const inputs = document.getElementsByTagName('input');
+
+        for (const input of inputs) {
+            input.addEventListener('blur', (event) => {
+                submitData(event);
+            });
+        }
+        function submitData(e) {
+            let count = 0;
+            const total_number_of_working_days = calculateDays();
+            if (!total_number_of_working_days) return;
+            let salary_per_month = document.getElementById("salary_per_month").valueAsNumber;
+            if (salary_per_month) count++;
+            let credited_salary = document.getElementById("credited_salary").valueAsNumber;
+            if (credited_salary) count++;
+            let number_of_working_days = document.getElementById("number_of_working_days").valueAsNumber;
+            let leaves = document.getElementById("leaves").valueAsNumber;
+            if (number_of_working_days) {
+                count++;
+            } else if (leaves) {
+                count++;
+            }
+            if (count > 1) {
+                if (!number_of_working_days && leaves) number_of_working_days = total_number_of_working_days - leaves;
+                let salary_per_day;
+                (function () {
+                    if (e.target.id !== 'salary_per_month' && credited_salary && !salary_per_month && number_of_working_days) {
+                        salary_per_month = (credited_salary / number_of_working_days) * total_number_of_working_days;
+                        if (count == 2) return;
+                    }
+                    salary_per_day = salary_per_month / total_number_of_working_days;
+                    if (e.target.id !== 'number_of_working_days' && !number_of_working_days && credited_salary && salary_per_day) {
+                        number_of_working_days = credited_salary / salary_per_day;
+                        if (count == 2) return;
+                    }
+                    if (e.target.id !== 'credited_salary' && number_of_working_days && salary_per_day) {
+                        credited_salary = number_of_working_days * salary_per_day;
+                        if (count == 2) return;
+                    }
+                })();
+
+
+                if (!leaves) leaves = total_number_of_working_days - number_of_working_days;
+                const salary_per_month_round = Math.round(salary_per_month);
+                const credited_salary_round = Math.round(credited_salary);
+                const number_of_working_days_round = Math.round(number_of_working_days);
+                const leaves_round = Math.round(leaves);
+                document.getElementById("salary_per_month_result").textContent = salary_per_month;
+                if (e.target.id !== 'salary_per_month') document.getElementById("salary_per_month").value = salary_per_month;
+                document.getElementById("salary_per_day_result").textContent = salary_per_day;
+                document.getElementById("total_number_of_working_days").textContent = total_number_of_working_days;
+                document.getElementById("credited_salary_result").textContent = credited_salary;
+                if (e.target.id !== 'credited_salary') document.getElementById("credited_salary").value = credited_salary;
+                document.getElementById("number_of_working_days_result").textContent = `${number_of_working_days_round} (${number_of_working_days})`;
+                if (e.target.id !== 'number_of_working_days') document.getElementById("number_of_working_days").value = number_of_working_days;
+                if (e.target.id !== 'leaves') document.getElementById("leaves").value = leaves;
+                document.getElementById("leaves_result").textContent = `${leaves_round < 0 ? 0 : leaves_round} (${leaves})`;
+            }
+        }
+        function calculateDays() {
+            const value = document.getElementById("month").value;
+            const [year, month] = value.split("-").map(Number);
+
+            const daysInMonth = new Date(year, month, 0).getDate();
+
+            let sundays = 0;
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                if (new Date(year, month - 1, day).getDay() === 0) {
+                    sundays++;
+                }
+            }
+
+            const result = daysInMonth - sundays;
+
+            return result;
+        }
+    </script>
+</body>
+
+</html>

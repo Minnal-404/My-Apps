@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Accounts</title>
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="container">
+    <header class="position-sticky top-0 z-3 start-0 end-0 ">
+        <ul class="nav bg-dark nav-pills mb-3 justify-content-evenly"
+            id="pills-tab" role="tablist">
+            <li class="nav-item w-50" role="presentation">
+                <button class="nav-link w-100 active" id="pills-credit-tab" data-bs-toggle="pill"
+                    data-bs-target="#credit_container" type="button" role="tab" aria-controls="credit_container"
+                    aria-selected="true">Credit</button>
+            </li>
+            <li class="nav-item w-50" role="presentation">
+                <button class="nav-link w-100" id="pills-debit-tab" data-bs-toggle="pill"
+                    data-bs-target="#debit_container" type="button" role="tab" aria-controls="debit_container"
+                    aria-selected="false">Debit</button>
+            </li>
+
+        </ul>
+    </header>
+    <main>
+
+        <div class="d-flex justify-content-end mb-3">
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample"
+                aria-expanded="false" aria-controls="collapseExample">
+                New
+            </button>
+        </div>
+
+        <div class="collapse" id="collapseExample">
+            <div class="mb-3 card card-body">
+                <form class="row g-3 needs-validation" novalidate>
+                    <div class="col-md-4">
+                        <input type="text" name="name" class="form-control" id="new_name" placeholder="Name" required>
+                        <div class="invalid-feedback">
+                            Name Is Required
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group has-validation">
+                            <span class="input-group-text" id="inputGroupPrepend">₹</span>
+                            <input type="number" name="amount" class="form-control" id="validationCustom02" min="1"
+                                placeholder="Amount" aria-describedby="inputGroupPrepend" required>
+                            <div class="invalid-feedback">
+                                Amount Is Required
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <button class="btn btn-success w-100" onclick="submit_data(event)" type="submit">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="tab-content" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="credit_container" role="tabpanel"
+                aria-labelledby="pills-credit-tab" tabindex="0">
+                <p class="card-text">These People Need To Give Money To You</p>
+            </div>
+            <div class="tab-pane fade" id="debit_container" role="tabpanel" aria-labelledby="pills-debit-tab"
+                tabindex="0">
+                <p class="card-text">You Need To Give Money To These People</p>
+            </div>
+
+        </div>
+    </main>
+    <button id="scroll_to_top_button" style="width: 3rem; height: 3rem;"
+        class="btn btn-dark rounded-circle border border-5 border-primary position-fixed bottom-0 end-0 m-4 d-none justify-content-center align-items-center">
+        ↑
+    </button>
+
+
+    <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const credit_container = document.getElementById('credit_container');
+        const debit_container = document.getElementById('debit_container');
+        const credits = JSON.parse(localStorage.getItem('credits')) || {};
+        const debits = JSON.parse(localStorage.getItem('debits')) || {};
+        const scroll_to_top_button = document.getElementById("scroll_to_top_button");
+
+        render(credits, 'credit');
+        render(debits, 'debit');
+
+        document.getElementById("collapseExample").addEventListener("shown.bs.collapse", () => {
+            document.getElementById("new_name").focus();
+        });
+
+        window.addEventListener("scroll", () => {
+            scroll_to_top_button.classList.toggle("d-none", window.scrollY < 1);
+        });
+
+        scroll_to_top_button.addEventListener("click", () => {
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        });
+
+        function render(object, view, is_new = false) {
+            const container = view == 'credit' ? credit_container : debit_container;
+            for (const [index, data] of Object.entries(object)) {
+                const row = document.createElement("div");
+                row.className = "card card-body mt-3";
+
+                row.innerHTML = `
+                <form name="${index}" class="row g-3 needs-validation" novalidate>
+                    <div class="col-md-4">
+                        <input type="text" name="name" value="${data.name}" class="form-control" id="validationCustom01" placeholder="Name" required>
+                        <div class="invalid-feedback">
+                            Name Is Required
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group has-validation">
+                            <span class="input-group-text" id="inputGroupPrepend">₹</span>
+                        <input type="number" name="current_amount" value="${data.amount}" disabled class="form-control" id="validationCustom02" min="1" placeholder="Amount"
+                                aria-describedby="inputGroupPrepend" required>
+                            <div class="invalid-feedback">
+                            Amount Is Required
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group has-validation">
+                            <span class="input-group-text" id="inputGroupPrepend">₹</span>
+                        <input type="number" name="amount" min="-${data.amount}" class="form-control" id="validationCustom02" min="1" placeholder="Amount"
+                                aria-describedby="inputGroupPrepend" >
+                            <div class="invalid-feedback">
+                            Amount Is Required
+                            </div>
+                        </div>
+                    </div>
+                   
+                    <div class="d-flex flex-column gap-3">
+                        <button class="btn btn-danger w-100 ${data.amount == 0 ? '' : 'd-none'}" name="remove_btn" onclick="removeRow(this, '${index}')" type="button">Remove</button>
+                        <button class="btn btn-success w-100" onclick="submit_data(event)" type="submit">Save</button>
+                    </div>
+                </form>
+  `;
+                container.appendChild(row);
+                if (is_new) {
+                    row.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start"
+                    });
+                }
+            }
+        }
+
+        function removeRow(button, index) {
+            button.closest('.card').remove();
+            const type = credit_container.classList.contains('active') ? 'credit' : 'debit';
+            type == 'credit' ? delete credits[index] : delete debits[index];
+            localStorage.setItem(type == 'credit' ? "credits" : 'debits', JSON.stringify(type == 'credit' ? credits : debits));
+        }
+
+        function submit_data(event) {
+            event.preventDefault();
+            const button = event.target;
+            const form = button.closest('form');
+            if (!form.checkValidity()) {
+                event.stopPropagation();
+                form.classList.add('was-validated');
+            } else {
+                form.classList.remove('was-validated');
+                const index = form.getAttribute('name');
+                const type = credit_container.classList.contains('active') ? 'credit' : 'debit';
+                const data = {
+                    name: form.name.value,
+                    amount: form.amount.valueAsNumber || 0
+                };
+                if (index) {
+                    const current_amount = form.current_amount;
+                    data.amount += current_amount.valueAsNumber;
+                    type == 'credit' ? credits[index] = data : debits[index] = data;
+                    current_amount.value = data.amount;
+                    form.amount.min = -data.amount;
+                    form.amount.value = '';
+                    if (data.amount == 0) {
+                        removeRow(form, index);
+                    }
+                    localStorage.setItem(type == 'credit' ? "credits" : 'debits', JSON.stringify(type == 'credit' ? credits : debits));
+                } else {
+                    const id = crypto.randomUUID();
+                    type == 'credit' ? credits[id] = data : debits[id] = data;
+                    render({ [id]: data }, type, true);
+                    form.reset();
+                    localStorage.setItem(type == 'credit' ? "credits" : 'debits', JSON.stringify(type == 'credit' ? credits : debits));
+                }
+            }
+        }
+
+    </script>
+</body>
+
+</html>

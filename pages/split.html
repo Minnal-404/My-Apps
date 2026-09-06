@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Split</title>
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+    <main class="container pt-3">
+
+        <div id="inputs">
+             <div class="card card-body mb-3">
+                <form class="row g-3 needs-validation" novalidate>
+                    <div class="col-md-4">
+                        <input type="text" name="name" class="form-control" id="new_name" placeholder="Name" required>
+                        <div class="invalid-feedback">
+                            Name Is Required
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group has-validation">
+                            <span class="input-group-text" id="inputGroupPrepend">₹</span>
+                            <input type="text" inputmode="tel" name="amount" class="form-control" id="validationCustom02" min="1"
+                                placeholder="Amount" aria-describedby="inputGroupPrepend" required>
+                            <div class="invalid-feedback">
+                                Amount Is Required
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <button class="btn btn-danger w-100" onclick="removeRow(this)" type="button">Remove</button>
+                    </div>
+                </form>
+            </div>
+            <!-- <div class="row">
+                <input type="text" name="name" placeholder="Name">
+                <input type="text" inputmode="tel" name="amount" placeholder="Amount">
+                <button type="button" class="remove-btn" onclick="removeRow(this)">Remove</button>
+            </div> -->
+        </div>
+
+    <button type="button" class="btn btn-primary w-100 mb-3" onclick="addRow()">Add Row</button>
+    <button type="button" class="btn btn-success w-100 mb-3" onclick="submitData()">Submit</button>
+
+        <div id="result" class="fw-bold fs-5">
+            Every Outing Ends With
+            <span class="text-warning">"Bro, Calculate And Tell Me"</span>
+            Chaos.
+            Let's Fix It.
+        </div>
+    </main>
+    <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function addRow() {
+            const row = document.createElement("div");
+            row.className = "card card-body mb-3";
+
+            row.innerHTML = `
+                <form class="row g-3 needs-validation" novalidate>
+                    <div class="col-md-4">
+                        <input type="text" name="name" class="form-control" id="new_name" placeholder="Name" required>
+                        <div class="invalid-feedback">
+                            Name Is Required
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group has-validation">
+                            <span class="input-group-text" id="inputGroupPrepend">₹</span>
+                            <input type="text" inputmode="tel" name="amount" class="form-control" id="validationCustom02" min="1"
+                                placeholder="Amount" aria-describedby="inputGroupPrepend" required>
+                            <div class="invalid-feedback">
+                                Amount Is Required
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <button class="btn btn-danger w-100" onclick="removeRow(this)" type="button">Remove</button>
+                    </div>
+                </form>
+  `;
+
+            document.getElementById("inputs").appendChild(row);
+            const element = row.querySelector('input[name="name"]');
+            element.focus();
+            element.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
+        function removeRow(button) {
+            button.closest('.card').remove();
+        }
+        function submitData() {
+            const rows = document.querySelectorAll("form");
+
+            const inputs = Array.from(rows).map(row => ({
+                name: row.querySelector('input[name="name"]').value,
+                amount: row.querySelector('input[name="amount"]').value
+            }));
+
+
+            // let inputs = [{ name: "Jeshin", amount: "" }, { name: "Dinesh", amount: "360" }, { name: "Padmanathan", amount: "" }];
+            for (const item of inputs) {
+                if (!item.name) return;
+                item.amount = item.amount
+                    .split("-")
+                    .reduce((sum, num) => (sum + Number(num)), 0) / inputs.length;
+            };
+            let final = [];
+            for (let i = 0; i < inputs.length - 1; i++) {
+                for (let j = i + 1; j < inputs.length; j++) {
+                    if (inputs[i].amount < inputs[j].amount) {
+                        final.push({ from: inputs[i].name, to: inputs[j].name, amount: inputs[j].amount - inputs[i].amount });
+                    } else if (inputs[i].amount > inputs[j].amount) {
+                        final.push({ from: inputs[j].name, to: inputs[i].name, amount: inputs[i].amount - inputs[j].amount });
+
+                    }
+                }
+            }
+            console.log(inputs, final);
+            document.getElementById("result").innerHTML = '';
+            if (final.length == 0) document.getElementById("result").innerHTML = `None Has To Pay Anything. All Set :)`;
+            final.forEach(item => {
+
+                document.getElementById("result").innerHTML += `${item.from} Has To Pay <span class="text-warning">₹${item.amount}</span> To ${item.to}<br>`;
+            });
+            document.getElementById("result").scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
+    </script>
+</body>
+
+</html>
