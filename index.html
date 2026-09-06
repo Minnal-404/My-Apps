@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>My Apps</title>
-    <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
-    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" href="./icons/favicon.svg" type="image/svg+xml">
+    <link rel="manifest" href="./manifest.webmanifest">
     <meta name="theme-color" content="#111827">
     <link href="./bootstrap/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -18,7 +18,7 @@
     <main class="container">
         <div class="row p-3">
             <div class="col-3 p-0">
-                <a href="pages/split.html"
+                <a href="./pages/split.html"
                     class="text-decoration-none text-reset d-flex flex-column align-items-center gap-2">
 
                     <!-- <h5 class="card-title">Special title treatment</h5> -->
@@ -32,7 +32,7 @@
                 </a>
             </div>
             <div class="col-3 p-0">
-                <a href="pages/salary_details.html"
+                <a href="./pages/salary_details.html"
                     class="text-decoration-none text-reset d-flex flex-column align-items-center gap-2">
                     <!-- <h5 class="card-title">Special title treatment</h5> -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="2.5em" height="2.5em" fill="currentColor"
@@ -45,7 +45,7 @@
                 </a>
             </div>
             <div class="col-3 p-0">
-                <a href="pages/accounts.html"
+                <a href="./pages/accounts.html"
                     class="text-decoration-none text-reset d-flex flex-column align-items-center gap-2">
                     <!-- <h5 class="card-title">Special title treatment</h5> -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="2.5em" height="2.5em" fill="currentColor"
@@ -64,7 +64,7 @@
     <script>
         if ("serviceWorker" in navigator) {
             window.addEventListener("load", () => {
-                navigator.serviceWorker.register("/sw.js");
+                navigator.serviceWorker.register("./sw.js");
             });
         }
 
