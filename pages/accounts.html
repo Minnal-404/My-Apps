@@ -118,6 +118,7 @@
 
     <script>
         const carousel = document.getElementById('carouselExampleAutoplaying');
+        const carousel_element = bootstrap.Carousel.getOrCreateInstance(carousel);
         const credit_container = document.getElementById('credit_container');
         const debit_container = document.getElementById('debit_container');
         const credits = JSON.parse(localStorage.getItem('credits')) || {};
@@ -149,7 +150,7 @@
                 event.to ? debit_button.checked = true : credit_button.checked = true;
             }, 100);
         });
-
+        carousel_element.pause();
         function render(object, view, is_new = false) {
             const container = view == 'credit' ? credit_container : debit_container;
             for (const [index, data] of Object.entries(object)) {

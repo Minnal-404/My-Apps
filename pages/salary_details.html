@@ -18,9 +18,9 @@
                 <form class="row g-3 needs-validation" novalidate>
                     <div class="col-md-4">
                         <label for="month" class="form-label">Month : </label>
-                        <input type="month" id="month" name="month" class="form-control" >
+                        <input type="month" id="month" name="month" class="form-control">
                         <div class="invalid-feedback">
-                            Name Is 
+                            Name Is
                         </div>
                     </div>
 
@@ -28,10 +28,10 @@
                         <label for="salary_per_month" class="form-label">Salary Per Month : </label>
                         <div class="input-group has-validation">
                             <span class="input-group-text" id="">₹</span>
-                            <input type="number" name="amount" class="form-control" id="salary_per_month"
-                                min="0" placeholder="Salary Per Month" aria-describedby="inputGroupPrepend" >
+                            <input type="number" name="amount" class="form-control" id="salary_per_month" min="0"
+                                placeholder="Salary Per Month" aria-describedby="inputGroupPrepend">
                             <div class="invalid-feedback">
-                                Amount Is 
+                                Amount Is
                             </div>
                         </div>
                     </div>
@@ -39,30 +39,29 @@
                         <label for="credited_salary" class="form-label">Credited Salary : </label>
                         <div class="input-group has-validation">
                             <span class="input-group-text" id="inputGroupPrepend">₹</span>
-                            <input type="number" name="credited_salary" class="form-control"
-                                id="credited_salary" min="0" placeholder="Credited Salary"
-                                aria-describedby="inputGroupPrepend" >
+                            <input type="number" name="credited_salary" class="form-control" id="credited_salary"
+                                min="0" placeholder="Credited Salary" aria-describedby="inputGroupPrepend">
                             <div class="invalid-feedback">
-                                Amount Is 
+                                Amount Is
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <label for="number_of_working_days" class="form-label">Your Working Days : </label>
-                            <input type="number" name="number_of_working_days" class="form-control"
-                                id="number_of_working_days" min="0" placeholder="Your Working Days"
-                                aria-describedby="inputGroupPrepend" >
-                            <div class="invalid-feedback">
-                                Amount Is 
-                            </div>
+                        <input type="number" name="number_of_working_days" class="form-control"
+                            id="number_of_working_days" min="0" placeholder="Your Working Days"
+                            aria-describedby="inputGroupPrepend">
+                        <div class="invalid-feedback">
+                            Amount Is
+                        </div>
                     </div>
                     <div class="col-md-4">
                         <label for="leaves" class="form-label">Leaves : </label>
-                            <input type="number" name="leaves" class="form-control" id="leaves" min="0"
-                                placeholder="Leaves" aria-describedby="inputGroupPrepend" >
-                            <div class="invalid-feedback">
-                                Amount Is 
-                            </div>
+                        <input type="number" name="leaves" class="form-control" id="leaves" min="0" placeholder="Leaves"
+                            aria-describedby="inputGroupPrepend">
+                        <div class="invalid-feedback">
+                            Amount Is
+                        </div>
                     </div>
                 </form>
             </div>
@@ -84,6 +83,7 @@
     </main>
     <script>
         const inputs = document.getElementsByTagName('input');
+        const leaves_array = JSON.parse(localStorage.getItem('leaves')) || [[], [], []];
 
         for (const input of inputs) {
             input.addEventListener('blur', (event) => {
@@ -92,7 +92,8 @@
         }
         function submitData(e) {
             let count = 0;
-            const total_number_of_working_days = calculateDays();
+            const value = document.getElementById("month").value;
+            const total_number_of_working_days = calculateDays(value);
             if (!total_number_of_working_days) return;
             let salary_per_month = document.getElementById("salary_per_month").valueAsNumber;
             if (salary_per_month) count++;
@@ -100,6 +101,17 @@
             if (credited_salary) count++;
             let number_of_working_days = document.getElementById("number_of_working_days").valueAsNumber;
             let leaves = document.getElementById("leaves").valueAsNumber;
+            if (e.target.id == 'month') {
+                for (const month of leaves_array) {
+                    if (!month[0]) continue;
+                    const month_number = month[0].date.slice(0, 7);
+                    const current_month = value.slice(0, 7);
+                    if (month_number == current_month){
+                        document.getElementById("leaves").value = month.length;
+                        leaves = month.length;
+                    }
+                }
+            }
             if (number_of_working_days) {
                 count++;
             } else if (leaves) {
@@ -142,8 +154,7 @@
                 document.getElementById("leaves_result").textContent = `${leaves_round < 0 ? 0 : leaves_round} (${leaves})`;
             }
         }
-        function calculateDays() {
-            const value = document.getElementById("month").value;
+        function calculateDays(value) {
             const [year, month] = value.split("-").map(Number);
 
             const daysInMonth = new Date(year, month, 0).getDate();

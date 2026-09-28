@@ -8,6 +8,7 @@ const APP_SHELL = [
     "./icons/icon-512.png",
     "./icons/favicon.svg",
     "./pages/accounts.html",
+    "./pages/attendance.html",
     "./pages/salary_details.html",
     "./pages/split.html",
     "./bootstrap/css/bootstrap.min.css",

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Attendance</title>
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .accordion-button:not(.collapsed) {
+            color: inherit !important;
+            background-color: inherit !important;
+        }
+
+        .accordion-button:not(.collapsed).list-group-item {
+            background-color: var(--bs-info-bg-subtle) !important;
+            color: var(--bs-info-text-emphasis) !important;
+        }
+
+        .accordion-button {
+            box-shadow: none !important;
+        }
+    </style>
+</head>
+
+<body class="container">
+    <header class="position-sticky bg-dark top-0 z-2 start-0 end-0 ">
+        <h2 class="text-center"> Attendance</h2>
+    </header>
+    <main>
+        <div class="d-flex justify-content-end my-3">
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample"
+                aria-expanded="false" aria-controls="collapseExample">
+                New
+            </button>
+        </div>
+
+        <div class="collapse" id="collapseExample">
+            <div class="mb-3 card card-body">
+                <form class="row g-3 needs-validation" novalidate>
+                    <div class="col-md-4">
+                        <label for="date" class="form-label">Date : </label>
+                        <input type="date" id="date" name="date" class="form-control" required>
+                        <div class="invalid-feedback">
+                            Date Is Required
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+
+                        <label for="reason" class="form-label">Reason :</label>
+                        <div class="input-group mb-3 gap-3">
+                            <textarea class="form-control" placeholder="Reason" id="reason" rows="3"></textarea>
+                            <div class="d-flex align-items-end" id="basic-addon2">
+                                <button class="btn btn-danger" id="clear_button" type="button">
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <button class="btn btn-success w-100" onclick="submit_data(event)" type="submit">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="accordion" id="leaves_container"></div>
+    </main>
+    <button id="scroll_to_top_button" style="width: 3rem; height: 3rem;"
+        class="btn btn-dark rounded-circle border border-5 border-primary position-fixed bottom-0 end-0 m-4 d-none justify-content-center align-items-center z-3">
+        ↑
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <h5 class=" fw-bold text-center">
+                        Are Your Sure Want To Delete ?
+                    </h5>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+                        <button type="button" id="delete_button" onclick="delete_date(this.name)"
+                            data-bs-dismiss="modal" class="btn btn-danger">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3 z-3">
+        <div id="liveToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
+            aria-atomic="true">
+            <div class="d-flex">
+                <div id="toast_body" class="toast-body">
+                    Hello, world! This is a toast message.
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const leaves_container = document.getElementById('leaves_container');
+        const toastLiveExample = document.getElementById('liveToast');
+        const toast_body = document.getElementById('toast_body');
+        const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample)
+        const date = document.getElementById("date");
+        const reason = document.getElementById('reason');
+        const leaves = JSON.parse(localStorage.getItem('leaves')) || [[], [], []];
+        const scroll_to_top_button = document.getElementById("scroll_to_top_button");
+        const clear_button = document.getElementById("clear_button");
+        const today = new Date();
+        date.value = today.toISOString().split("T")[0];
+        // const leaves = [
+        //     [],
+        //     [{ date: '2026-09-02', reason: '' }, { date: '2026-09-07', reason: 'Hello' }],
+        //     [{ date: '2026-11-07', reason: '' }]
+        // ];
+
+        console.log(leaves)
+
+        render(leaves);
+
+        window.addEventListener("scroll", () => {
+            scroll_to_top_button.classList.toggle("d-none", window.scrollY < 1);
+        });
+
+        scroll_to_top_button.addEventListener("click", () => {
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        });
+
+        clear_button.addEventListener("click", () => {
+            reason.value = '';
+        });
+
+        document.getElementById("collapseExample").addEventListener("shown.bs.collapse", () => {
+            reason.focus();
+        });
+
+        date.addEventListener("change", (e) => {
+            if (e.target.value) reason.focus();
+        });
+
+        function render(array) {
+
+            for (const month of array) {
+                if (!month[0]) continue;
+                const month_number = month[0].date.slice(0, 7);
+
+                const date = new Date(month[0].date);
+
+                const month_year = date.toLocaleDateString("en-US", {
+                    month: "long",
+                    year: "numeric"
+                });
+
+                console.log(month_year);
+                // September 2026
+                let lists = '';
+                for (const [index, leave] of month.entries()) {
+                    const { day_number, day_name } = get_date_strings(leave.date);
+                    lists += `
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed list-group-item list-group-item-info " type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapse_date_${leave.date}" aria-expanded="false" aria-controls="collapse_date_${leave.date}">
+                                    ${day_number} - ${day_name}
+                                </button>
+                            </h2>
+                            <div id="collapse_date_${leave.date}" class="accordion-collapse collapse" data-bs-parent="#list_group_${month_number}">
+                                <div class="accordion-body">
+                                    ${leave.reason || "No Reason"}
+                                    <div class="d-flex justify-content-end">
+                                        <button type="button" onclick="document.getElementById('delete_button').name = '${leave.date}'" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                const row = document.createElement("div");
+                row.className = "accordion-item";
+                row.innerHTML = `
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse_${month_number}" aria-expanded="false" aria-controls="collapse_${month_number}">
+                            ${month_year} -&nbsp;<span id="days_count_${month_number}">${month.length}</span>&nbsp;Days
+                        </button>
+                    </h2>
+                    <div id="collapse_${month_number}" class="accordion-collapse collapse" data-bs-parent="#leaves_container">
+                        <div class="accordion-body pt-0">
+                            <ul id="list_group_${month_number}" class="list-group">${lists}</ul>
+                        </div>
+                    </div>
+                `;
+                leaves_container.appendChild(row);
+                // if (is_new) {
+                //     row.scrollIntoView({
+                //         behavior: "smooth",
+                //         block: "start"
+                //     });
+                // }
+            }
+        }
+
+        function update_count(id, count) {
+            document.getElementById(`days_count_${id}`).textContent = count;
+        }
+
+        function get_date_strings(date) {
+            const new_date = new Date(date);
+            return {
+                day_number: new_date.getDate(),
+                day_name: new_date.toLocaleDateString('en-US', {
+                    weekday: 'long'
+                }),
+                new_date
+            }
+        }
+
+        function add(date, reason = '') {
+            const new_month = date.slice(0, 7);
+            for (const month of leaves) {
+                if (month.length > 0) {
+                    const current_month = month[0].date.slice(0, 7);
+                    if (new_month < current_month) {
+                        toast_body.textContent = "Past Is Past";
+                        toastBootstrap.show();
+                        return;
+                    }
+                    console.log(current_month)
+                    if (current_month == new_month) {
+
+                        for (let index = 0; index < month.length; index++) {
+                            const current_date = month[index].date;
+                            if (current_date == date) {
+                                toast_body.textContent = "Date Already Exists";
+                                toastBootstrap.show();
+                                return;
+                            }
+                            if (current_date > date) {
+                                month.splice(index, 0, { date, reason });
+                                localStorage.setItem('leaves', JSON.stringify(leaves));
+                                const { day_number, day_name } = get_date_strings(date);
+                                document.getElementById(`collapse_date_${current_date}`).closest('.accordion-item').insertAdjacentHTML('beforebegin', `
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed list-group-item list-group-item-info"
+                                                type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapse_date_${date}"
+                                                aria-expanded="false" aria-controls="collapse_date_${date}">
+                                                ${day_number} - ${day_name}
+                                            </button>
+                                        </h2>
+                                        <div id="collapse_date_${date}" class="accordion-collapse collapse"
+                                        data-bs-parent="#list_group_${new_month}">
+                                            <div class="accordion-body">
+                                                ${reason || "No Reason"}
+                                                <div class="d-flex justify-content-end">
+                                                    <button type="button"
+                                                        onclick="document.getElementById('delete_button').name='${date}'"
+                                                        class="btn btn-danger"
+                                                        data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                                            Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `);
+                                update_count(new_month, month.length);
+                                return;
+                            }
+                            console.log(month)
+                        }
+                        month.push({ date, reason });
+                        localStorage.setItem('leaves', JSON.stringify(leaves));
+                        const { day_number, day_name } = get_date_strings(date);
+                        document.getElementById(`list_group_${new_month}`).innerHTML += `
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed list-group-item list-group-item-info"
+                                                type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapse_date_${date}"
+                                                aria-expanded="false" aria-controls="collapse_date_${date}">
+                                                ${day_number} - ${day_name}
+                                            </button>
+                                        </h2>
+                                        <div id="collapse_date_${date}" class="accordion-collapse collapse"
+                                        data-bs-parent="#list_group_${new_month}">
+                                            <div class="accordion-body">
+                                                ${reason || "No Reason"}
+                                                <div class="d-flex justify-content-end">
+                                                    <button type="button"
+                                                        onclick="document.getElementById('delete_button').name='${date}'"
+                                                        class="btn btn-danger"
+                                                        data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                                            Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                        update_count(new_month, month.length);
+                        return;
+                    }
+                }
+
+            }
+
+            if (leaves[0]?.length > 0) leaves_container.firstElementChild.remove();
+            leaves.shift();
+            leaves.push([{ date, reason }]);
+            localStorage.setItem('leaves', JSON.stringify(leaves));
+            const { day_number, day_name, new_date } = get_date_strings(date);
+
+            const month_year = new_date.toLocaleDateString("en-US", {
+                month: "long",
+                year: "numeric"
+            });
+            leaves_container.innerHTML += `
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse_${new_month}" aria-expanded="false" aria-controls="collapse_${new_month}">
+                            ${month_year} -&nbsp;<span id="days_count_${new_month}">1</span>&nbsp;Days
+                        </button>
+                    </h2>
+                    <div id="collapse_${new_month}" class="accordion-collapse collapse" data-bs-parent="#leaves_container">
+                        <div class="accordion-body">
+                            <ul id="list_group_${new_month}" class="list-group">
+                                <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed list-group-item list-group-item-info"
+                                                type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapse_date_${date}"
+                                                aria-expanded="false" aria-controls="collapse_date_${date}">
+                                                ${day_number} - ${day_name}
+                                            </button>
+                                        </h2>
+                                        <div id="collapse_date_${date}" class="accordion-collapse collapse"
+                                        data-bs-parent="#list_group_${new_month}">
+                                            <div class="accordion-body">
+                                                ${reason || "No Reason"}
+                                                <div class="d-flex justify-content-end">
+                                                    <button type="button"
+                                                        onclick="document.getElementById('delete_button').name='${date}'"
+                                                        class="btn btn-danger"
+                                                        data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                                            Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                    `;
+        }
+
+        function delete_date(date) {
+            const new_month = date.slice(0, 7);
+            for (const month of leaves) {
+                if (month.length > 0) {
+                    const current_month = month[0].date.slice(0, 7);
+                    if (current_month == new_month) {
+                        const index = leaves.findIndex(x => x.date === date);
+                        month.splice(index, 1);
+                        localStorage.setItem('leaves', JSON.stringify(leaves));
+                        console.log(leaves);
+                        if (month.length == 0) return document.getElementById(`collapse_${new_month}`).closest('.accordion-item').remove();
+                        document.getElementById(`collapse_date_${date}`).closest('.accordion-item').remove();
+                        update_count(new_month, month.length);
+                        return;
+                    }
+                }
+            }
+        }
+
+        function submit_data(event) {
+            event.preventDefault();
+            const button = event.target;
+            const form = button.closest('form');
+            if (!form.checkValidity()) {
+                event.stopPropagation();
+                form.classList.add('was-validated');
+            } else {
+                form.classList.remove('was-validated');
+                const data = {
+                    date: form.date.value,
+                    reason: form.reason.value.trim()
+                };
+                add(form.date.value, form.reason.value.trim())
+                // localStorage.setItem('leaves', JSON.stringify(leaves));
+                console.log(leaves, data)
+                form.date.value = '';
+            }
+        }
+
+    </script>
+</body>
+
+</html>
